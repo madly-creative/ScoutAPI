@@ -57,6 +57,7 @@ def _ps_params(url: str, strategy: str) -> dict:
 async def _fetch_pagespeed(
     client: httpx.AsyncClient, url: str, strategy: str
 ) -> Optional[dict]:
+    import traceback
     try:
         r = await client.get(
             _PS_BASE,
@@ -70,15 +71,12 @@ async def _fetch_pagespeed(
             )
             return None
         return r.json()
-    except httpx.HTTPStatusError as exc:
+    except Exception as exc:
         print(
-            f"[API] PageSpeed {strategy} HTTP {exc.response.status_code}\n"
-            f"{exc.response.text[:2000]}",
+            f"[API] PageSpeed {strategy} exception {repr(exc)}\n"
+            f"{''.join(traceback.format_exc())}",
             file=sys.stderr,
         )
-        return None
-    except Exception as exc:
-        print(f"[API] PageSpeed {strategy} failed: {exc}", file=sys.stderr)
         return None
 
 
