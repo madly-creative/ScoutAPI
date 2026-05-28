@@ -63,8 +63,20 @@ async def _fetch_pagespeed(
             params=_ps_params(url, strategy),
             timeout=_PS_TIMEOUT,
         )
-        r.raise_for_status()
+        if r.status_code != 200:
+            print(
+                f"[API] PageSpeed {strategy} HTTP {r.status_code}\n{r.text[:2000]}",
+                file=sys.stderr,
+            )
+            return None
         return r.json()
+    except httpx.HTTPStatusError as exc:
+        print(
+            f"[API] PageSpeed {strategy} HTTP {exc.response.status_code}\n"
+            f"{exc.response.text[:2000]}",
+            file=sys.stderr,
+        )
+        return None
     except Exception as exc:
         print(f"[API] PageSpeed {strategy} failed: {exc}", file=sys.stderr)
         return None
